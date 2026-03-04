@@ -54,8 +54,40 @@ dotnet run
 ### Docker
 
 ```bash
-docker build -t opencoffee .
-docker run --network host -v $(pwd)/appsettings.json:/app/appsettings.json opencoffee
+docker run \
+  --name opencoffee \
+  -e Coffee__MachineIp=192.168.1.118 \
+  -e Coffee__Pin=0000 \
+  -e Coffee__DeviceName=CSharpCoffee \
+  -e Coffee__PollIntervalMinutes=1 \
+  -e Coffee__MqttHost=192.168.1.5 \
+  -e Coffee__MqttPort=1883 \
+  -e Coffee__MqttTopic=coffee \
+  -v /dockerData/coffee/hash.json:/app/hash.json \
+  ghcr.io/wouter-s/opencofee
+```
+
+> **Note:** The `hash.json` file must exist on the host before starting the container.
+> Create it with `touch /dockerData/coffee/hash.json` if it doesn't exist yet.
+
+### Docker Compose
+
+```yaml
+services:
+  opencoffee:
+    image: ghcr.io/wouter-s/opencofee
+    container_name: opencoffee
+    restart: unless-stopped
+    environment:
+      - Coffee__MachineIp=192.168.1.118
+      - Coffee__Pin=0000
+      - Coffee__DeviceName=CSharpCoffee
+      - Coffee__PollIntervalMinutes=1
+      - Coffee__MqttHost=192.168.1.5
+      - Coffee__MqttPort=1883
+      - Coffee__MqttTopic=coffee
+    volumes:
+      - /dockerData/coffee/hash.json:/app/hash.json
 ```
 
 ### Docker Bake (multi-platform)
